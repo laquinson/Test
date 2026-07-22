@@ -2,48 +2,73 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
-  <title>圓心角與圓周角（自主探究版）</title>
+  <title>圓心角與圓周角（LaTeX標準版）</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  
+  <!-- 引入 MathJax 3 庫以支援網頁 LaTeX 算式渲染 -->
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+      }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; text-align: center; background: #f4f4f7; padding: 10px; margin: 0; }
     h2 { font-size: 1.3rem; margin-bottom: 5px; }
     #canvas-container { display: inline-block; position: relative; background: #fff; border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,0.1); touch-action: none; }
     canvas { border-radius: 12px; cursor: pointer; }
     
-    /* 學生填空與檢查區塊樣式 */
     .quiz-panel {
       margin: 15px auto;
       padding: 15px;
       background: #fff;
       border-radius: 12px;
-      max-width: 460px;
+      max-width: 480px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
+
+    .formula-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      gap: 10px;
+    }
+
     .input-box {
       font-size: 1.2rem;
-      width: 70px;
+      width: 65px;
       text-align: center;
-      padding: 5px 8px;
+      padding: 5px;
       border: 2px solid #2980b9;
       border-radius: 6px;
       outline: none;
     }
+
     .check-btn {
       font-size: 1rem;
       font-weight: bold;
       background: #27ae60;
       color: white;
       border: none;
-      padding: 7px 16px;
+      padding: 8px 18px;
       border-radius: 6px;
       cursor: pointer;
-      margin-left: 8px;
+      margin-top: 12px;
     }
     .check-btn:active { background: #219150; }
+
     .feedback {
       margin-top: 10px;
       font-weight: bold;
-      font-size: 1.05rem;
+      font-size: 1rem;
       min-height: 24px;
     }
     .correct { color: #27ae60; }
@@ -53,18 +78,20 @@
 <body>
 
   <h2>探究：同弧的圓心角與圓周角</h2>
-  <p style="font-size:0.9rem; color:#666;">拖曳 <b>C 點</b> 或 <b>A, B 點</b>，觀察圖中的角度變化並回答問題：</p>
+  <p style="font-size:0.9rem; color:#666;">拖曳 <b>C 點</b> 或 <b>A, B 點</b>，觀察角度變化並計算比值：</p>
 
   <div id="canvas-container">
     <canvas id="geoCanvas" width="500" height="500"></canvas>
   </div>
 
-  <!-- 學生自主填空與檢驗區塊 -->
+  <!-- 教科書標準 LaTeX 算式區域 -->
   <div class="quiz-panel">
-    <label style="font-size: 1.1rem; font-weight: bold;">
-      圓心角 $\angle AOB \div$ 圓周角 $\angle ACB$ = 
+    <div class="formula-row">
+      <!-- 使用標準教科書分數格式：\frac{\angle AOB}{\angle ACB} -->
+      <span>$$ \frac{\angle AOB}{\angle ACB} = $$</span>
       <input type="number" id="userRatio" class="input-box" placeholder="?" step="any">
-    </label>
+    </div>
+
     <button class="check-btn" onclick="checkAnswer()">檢查答案</button>
     <div id="feedback" class="feedback"></div>
   </div>
@@ -83,7 +110,6 @@
     let activePoint = null;
     const touchHitRadius = 25;
 
-    // 當前實時算出的真實角度 (供驗證用)
     let currentDegO = 0;
     let currentDegC = 0;
 
@@ -101,14 +127,14 @@
       const B = getPos(angleB);
       const C = getPos(angleC);
 
-      // 畫圓
+      // 圓形
       ctx.beginPath();
       ctx.arc(center.x, center.y, radius, 0, Math.PI * 2);
       ctx.strokeStyle = '#ddd';
       ctx.lineWidth = 1.5;
       ctx.stroke();
 
-      // 畫弦 AB (虛線)
+      // 弦 AB (虛線)
       ctx.beginPath();
       ctx.moveTo(A.x, A.y);
       ctx.lineTo(B.x, B.y);
@@ -118,7 +144,7 @@
       ctx.stroke();
       ctx.setLineDash([]);
 
-      // 畫圓心角 (OA, OB)
+      // 圓心角 OA, OB
       ctx.beginPath();
       ctx.moveTo(A.x, A.y);
       ctx.lineTo(center.x, center.y);
@@ -127,7 +153,7 @@
       ctx.lineWidth = 3;
       ctx.stroke();
 
-      // 畫圓周角 (CA, CB)
+      // 圓周角 CA, CB
       ctx.beginPath();
       ctx.moveTo(A.x, A.y);
       ctx.lineTo(C.x, C.y);
@@ -138,7 +164,7 @@
 
       updateAndDrawAngles(A, B, C);
 
-      // 畫頂點與圓心
+      // 頂點
       drawPoint(center.x, center.y, 'O', '#333');
       drawPoint(A.x, A.y, 'A', '#e67e22');
       drawPoint(B.x, B.y, 'B', '#e67e22');
@@ -160,11 +186,9 @@
     }
 
     function updateAndDrawAngles(A, B, C) {
-      // 計算圓心角
       let degO = Math.abs((angleA - angleB) * (180 / Math.PI));
       if (degO > 180) degO = 360 - degO;
 
-      // 計算圓周角
       const vCA = { x: A.x - C.x, y: A.y - C.y };
       const vCB = { x: B.x - C.x, y: B.y - C.y };
       const dot = vCA.x * vCB.x + vCA.y * vCB.y;
@@ -175,7 +199,7 @@
       currentDegO = degO;
       currentDegC = degC;
 
-      // 圖形內動態標示角度
+      // 圖內繪製角度
       ctx.font = 'bold 16px sans-serif';
       ctx.fillStyle = '#e67e22';
       ctx.fillText(degO.toFixed(1) + '°', center.x - 20, center.y + 35);
@@ -185,30 +209,28 @@
       ctx.fillText(degC.toFixed(1) + '°', C.x - 20, C.y + textOffset);
     }
 
-    // 檢查答案邏輯
     function checkAnswer() {
       const inputVal = parseFloat(document.getElementById('userRatio').value);
       const feedback = document.getElementById('feedback');
 
       if (isNaN(inputVal)) {
         feedback.className = 'feedback incorrect';
-        feedback.innerText = '請先在方格內輸入你計算出的數字喔！';
+        feedback.innerText = '請先在輸入框輸入你的計算結果！';
         return;
       }
 
-      const exactRatio = currentDegO / currentDegC; // 約為 2.0
+      const exactRatio = currentDegO / currentDegC;
 
-      // 允許學生輸入 2 或接近 2 的數值
       if (Math.abs(inputVal - exactRatio) < 0.1 || Math.abs(inputVal - 2) < 0.1) {
         feedback.className = 'feedback correct';
-        feedback.innerText = '🎉 太棒了！答對了！圓心角永遠是圓周角的 2 倍！';
+        feedback.innerText = '🎉 太棒了！答對了！圓心角是圓周角的 2 倍！';
       } else {
         feedback.className = 'feedback incorrect';
-        feedback.innerText = '別灰心，拿圖上的圓心角 (' + currentDegO.toFixed(1) + '°) 除以 圓周角 (' + currentDegC.toFixed(1) + '°) 算算看！';
+        feedback.innerText = '再算算看：' + currentDegO.toFixed(1) + '° ÷ ' + currentDegC.toFixed(1) + '°';
       }
     }
 
-    // iPad 觸控處理
+    // Touch 事件處理
     function getTouchPos(e) {
       const rect = canvas.getBoundingClientRect();
       const touch = e.touches[0];
@@ -234,9 +256,7 @@
       if (activePoint === 'A') angleA = newAng;
       if (activePoint === 'B') angleB = newAng;
 
-      // 清空舊提示，讓學生重新計算
       document.getElementById('feedback').innerText = '';
-
       draw();
     }
 
