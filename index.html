@@ -2,28 +2,29 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
-  <title>圓心角與圓周角關係探究</title>
+  <title>圓心角與圓周角（iPad觸控版）</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <style>
-    body { font-family: sans-serif; text-align: center; background: #f9f9f9; padding: 20px; }
-    #canvas-container { display: inline-block; position: relative; background: #fff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-    canvas { border: 1px solid #ddd; border-radius: 8px; cursor: pointer; }
-    .info-panel { margin-top: 15px; font-size: 1.2rem; line-height: 1.8; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; text-align: center; background: #f4f4f7; padding: 10px; margin: 0; overflow: hidden; /* 防止iPad頁面滑動 */ }
+    h2 { font-size: 1.3rem; margin-bottom: 5px; }
+    #canvas-container { display: inline-block; position: relative; background: #fff; border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,0.1); touch-action: none; /* 關鍵：防止iPad拖曳時滑動頁面 */ }
+    canvas { border-radius: 12px; cursor: pointer; }
+    .info-panel { margin-top: 10px; font-size: 1rem; line-height: 1.6; padding: 10px; background: #fff; border-radius: 8px; max-width: 480px; margin-left: auto; margin-right: auto; }
     .highlight { font-weight: bold; color: #d9534f; }
   </style>
 </head>
 <body>
 
-  <h2>探究：同弧所對的圓心角與圓周角</h2>
-  <p>試著用滑鼠拖曳圓周上的 <b>C 點</b>，觀察圓周角的變化；或拖曳 <b>A、B 點</b> 改變弧長！</p>
+  <h2>探究：同弧的圓心角與圓周角</h2>
+  <p style="font-size:0.9rem; color:#666;">試著手指拖曳 <b>C 點</b> (藍點) 或 <b>A, B 點</b> (橘點)</p>
 
   <div id="canvas-container">
     <canvas id="geoCanvas" width="500" height="500"></canvas>
   </div>
 
   <div class="info-panel">
-    <div>圓心角 $\angle AOB$ = <span id="angleO" class="highlight">0</span>°</div>
-    <div>圓周角 $\angle ACB$ = <span id="angleC" class="highlight">0</span>°</div>
     <div>關係比值 ($\angle AOB \div \angle ACB$) = <span id="ratio" class="highlight">0</span></div>
+    <div style="font-size:0.8rem; color: #777;">（數值直接顯示在圖中，更直觀！）</div>
   </div>
 
   <script>
@@ -34,11 +35,12 @@
     const radius = 180;
 
     // 角度 (以弧度表示)
-    let angleA = Math.PI * 0.75;  // 左下
-    let angleB = Math.PI * 0.25;  // 右下
-    let angleC = -Math.PI * 0.5;  // 正上方
+    let angleA = Math.PI * 0.70;  // 左下
+    let angleB = Math.PI * 0.30;  // 右下
+    let angleC = -Math.PI * 0.5;  // 正上方 (起始點)
 
     let activePoint = null;
+    const touchHitRadius = 25; // 加大觸控反應半徑
 
     function getPos(ang) {
       return {
@@ -57,16 +59,26 @@
       // 畫圓
       ctx.beginPath();
       ctx.arc(center.x, center.y, radius, 0, Math.PI * 2);
-      ctx.strokeStyle = '#ccc';
-      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#ddd';
+      ctx.lineWidth = 1.5;
       ctx.stroke();
+
+      // [新增] 畫弦 AB (虛線)
+      ctx.beginPath();
+      ctx.moveTo(A.x, A.y);
+      ctx.lineTo(B.x, B.y);
+      ctx.strokeStyle = '#777';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([8, 6]); // 虛線樣式
+      ctx.stroke();
+      ctx.setLineDash([]); // 恢復實線
 
       // 畫圓心角 (OA, OB)
       ctx.beginPath();
       ctx.moveTo(A.x, A.y);
       ctx.lineTo(center.x, center.y);
       ctx.lineTo(B.x, B.y);
-      ctx.strokeStyle = '#e67e22';
+      ctx.strokeStyle = '#e67e22'; // 橘色
       ctx.lineWidth = 3;
       ctx.stroke();
 
@@ -75,30 +87,36 @@
       ctx.moveTo(A.x, A.y);
       ctx.lineTo(C.x, C.y);
       ctx.lineTo(B.x, B.y);
-      ctx.strokeStyle = '#2980b9';
+      ctx.strokeStyle = '#2980b9'; // 藍色
       ctx.lineWidth = 3;
       ctx.stroke();
 
-      // 畫圓心 O
+      // [新增] 計算並直接在圖中顯示角度
+      updateAndDrawAngles(A, B, C);
+
+      // 畫圓心 O 和 頂點
       drawPoint(center.x, center.y, 'O', '#333');
       drawPoint(A.x, A.y, 'A', '#e67e22');
       drawPoint(B.x, B.y, 'B', '#e67e22');
       drawPoint(C.x, C.y, 'C', '#2980b9');
-
-      updateStats(A, B, C);
     }
 
     function drawPoint(x, y, label, color) {
       ctx.beginPath();
-      ctx.arc(x, y, 8, 0, Math.PI * 2);
+      // 在iPad上稍微加大圓點顯示
+      ctx.arc(x, y, 9, 0, Math.PI * 2);
       ctx.fillStyle = color;
       ctx.fill();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
       ctx.fillStyle = '#000';
-      ctx.font = '16px Arial';
-      ctx.fillText(label, x + 12, y + 5);
+      ctx.font = 'bold 18px Arial';
+      ctx.fillText(label, x + 15, y + 6);
     }
 
-    function updateStats(A, B, C) {
+    function updateAndDrawAngles(A, B, C) {
       // 計算圓心角 (劣弧)
       let degO = Math.abs((angleA - angleB) * (180 / Math.PI));
       if (degO > 180) degO = 360 - degO;
@@ -111,45 +129,79 @@
       const magCB = Math.hypot(vCB.x, vCB.y);
       let degC = Math.acos(dot / (magCA * magCB)) * (180 / Math.PI);
 
-      document.getElementById('angleO').innerText = degO.toFixed(1);
-      document.getElementById('angleC').innerText = degC.toFixed(1);
+      // [新增] 在圖中繪製角度文字
+      ctx.font = 'bold 16px sans-serif';
+      ctx.fillStyle = '#e67e22'; // 圓心角橘色
+      ctx.fillText(degO.toFixed(1) + '°', center.x - 20, center.y + 35); // O點下方
+
+      ctx.fillStyle = '#2980b9'; // 圓周角藍色
+      // 根據C點位置，動態調整文字顯示位置以免擋住點
+      let textOffset = (C.y < center.y) ? 25 : -15; 
+      ctx.fillText(degC.toFixed(1) + '°', C.x - 20, C.y + textOffset);
+
+      // 更新下方比值
       document.getElementById('ratio').innerText = (degO / degC).toFixed(2);
     }
 
-    // 判斷拖曳點
-    canvas.addEventListener('mousedown', (e) => {
-      const rect = canvas.getBoundingClientRect();
-      const mx = e.clientX - rect.left;
-      const my = e.clientY - rect.top;
+    // --- 觸控 (Touch) 事件處理 - iPad 優化 ---
 
+    function getTouchPos(e) {
+      const rect = canvas.getBoundingClientRect();
+      const touch = e.touches[0]; // 取得第一個觸控點
+      return {
+        x: touch.clientX - rect.left,
+        y: touch.clientY - rect.top
+      };
+    }
+
+    function handleStart(ex, ey) {
       const pts = [{ name: 'C', ang: angleC }, { name: 'A', ang: angleA }, { name: 'B', ang: angleB }];
       for (let p of pts) {
         const pos = getPos(p.ang);
-        if (Math.hypot(pos.x - mx, pos.y - my) < 15) {
+        // 使用加大後的觸控判定半徑
+        if (Math.hypot(pos.x - ex, pos.y - ey) < touchHitRadius) {
           activePoint = p.name;
           break;
         }
       }
-    });
+    }
 
-    canvas.addEventListener('mousemove', (e) => {
+    function handleMove(ex, ey) {
       if (!activePoint) return;
-      const rect = canvas.getBoundingClientRect();
-      const mx = e.clientX - rect.left;
-      const my = e.clientY - rect.top;
-
-      let newAng = Math.atan2(my - center.y, mx - center.x);
+      let newAng = Math.atan2(ey - center.y, ex - center.x);
 
       if (activePoint === 'C') angleC = newAng;
       if (activePoint === 'A') angleA = newAng;
       if (activePoint === 'B') angleB = newAng;
 
       draw();
+    }
+
+    // 新增 Touch 事件
+    canvas.addEventListener('touchstart', (e) => {
+      const pos = getTouchPos(e);
+      handleStart(pos.x, pos.y);
+      // e.preventDefault(); // 視情況，touch-action: none 比較好
     });
 
+    canvas.addEventListener('touchmove', (e) => {
+      const pos = getTouchPos(e);
+      handleMove(pos.x, pos.y);
+      // e.preventDefault(); // 視情況
+    });
+
+    canvas.addEventListener('touchend', () => activePoint = null);
+
+    // 保留滑鼠事件，方便電腦測試
+    canvas.addEventListener('mousedown', (e) => {
+      handleStart(e.offsetX, e.offsetY);
+    });
+    canvas.addEventListener('mousemove', (e) => {
+      handleMove(e.offsetX, e.offsetY);
+    });
     window.addEventListener('mouseup', () => activePoint = null);
 
-    draw();
+    draw(); // 初始繪製
   </script>
 </body>
 </html>
