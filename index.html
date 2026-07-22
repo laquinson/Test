@@ -2,374 +2,153 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>二次函數圖像探究工具</title>
+  <title>圓心角與圓周角關係探究</title>
   <style>
-    :root {
-      --primary-color: #3b82f6;
-      --accent-color: #ef4444;
-      --bg-color: #f8fafc;
-      --panel-bg: #ffffff;
-      --text-color: #1e293b;
-    }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      background-color: var(--bg-color);
-      color: var(--text-color);
-      margin: 0;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    h1 {
-      margin-bottom: 5px;
-      color: #0f172a;
-    }
-
-    p.subtitle {
-      margin-top: 0;
-      color: #64748b;
-      font-size: 0.95rem;
-    }
-
-    .container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
-      max-width: 1000px;
-      width: 100%;
-      justify-content: center;
-      margin-top: 15px;
-    }
-
-    .canvas-container {
-      background: var(--panel-bg);
-      border-radius: 12px;
-      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
-      padding: 10px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    canvas {
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      background-color: #ffffff;
-    }
-
-    .controls-panel {
-      flex: 1;
-      min-width: 300px;
-      background: var(--panel-bg);
-      border-radius: 12px;
-      padding: 24px;
-      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-    }
-
-    .formula-display {
-      background: #eff6ff;
-      border-left: 4px solid var(--primary-color);
-      padding: 12px 16px;
-      border-radius: 0 8px 8px 0;
-      font-size: 1.2rem;
-      font-weight: 600;
-      color: #1e40af;
-      text-align: center;
-    }
-
-    .control-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .label-row {
-      display: flex;
-      justify-content: space-between;
-      font-weight: 500;
-    }
-
-    .param-val {
-      font-weight: 700;
-      color: var(--primary-color);
-    }
-
-    input[type=range] {
-      width: 100%;
-      height: 6px;
-      border-radius: 3px;
-      background: #e2e8f0;
-      outline: none;
-      accent-color: var(--primary-color);
-    }
-
-    .info-card {
-      background-color: #f1f5f9;
-      border-radius: 8px;
-      padding: 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      font-size: 0.9rem;
-    }
-
-    .info-item {
-      display: flex;
-      justify-content: space-between;
-    }
-
-    .info-label {
-      color: #64748b;
-    }
-
-    .info-value {
-      font-weight: 600;
-    }
-
-    .reset-btn {
-      background-color: #f1f5f9;
-      color: #475569;
-      border: 1px solid #cbd5e1;
-      padding: 10px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: background 0.2s;
-    }
-
-    .reset-btn:hover {
-      background-color: #e2e8f0;
-    }
+    body { font-family: sans-serif; text-align: center; background: #f9f9f9; padding: 20px; }
+    #canvas-container { display: inline-block; position: relative; background: #fff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    canvas { border: 1px solid #ddd; border-radius: 8px; cursor: pointer; }
+    .info-panel { margin-top: 15px; font-size: 1.2rem; line-height: 1.8; }
+    .highlight { font-weight: bold; color: #d9534f; }
   </style>
 </head>
 <body>
 
-  <h1>二次函數圖像探究</h1>
-  <p class="subtitle">頂點式：f(x) = a(x - h)² + k</p>
+  <h2>探究：同弧所對的圓心角與圓周角</h2>
+  <p>試著用滑鼠拖曳圓周上的 <b>C 點</b>，觀察圓周角的變化；或拖曳 <b>A、B 點</b> 改變弧長！</p>
 
-  <div class="container">
-    <div class="canvas-container">
-      <canvas id="gridCanvas" width="500" height="500"></canvas>
-    </div>
+  <div id="canvas-container">
+    <canvas id="geoCanvas" width="500" height="500"></canvas>
+  </div>
 
-    <div class="controls-panel">
-      <div class="formula-display" id="formulaText">
-        f(x) = 1(x - 0)² + 0
-      </div>
-
-      <!-- 滑塊 a -->
-      <div class="control-group">
-        <div class="label-row">
-          <label for="sliderA">開口與寬窄 <b>(a)</b></label>
-          <span class="param-val" id="valA">1.0</span>
-        </div>
-        <input type="range" id="sliderA" min="-5" max="5" step="0.1" value="1">
-      </div>
-
-      <!-- 滑塊 h -->
-      <div class="control-group">
-        <div class="label-row">
-          <label for="sliderH">左右平移 <b>(h)</b></label>
-          <span class="param-val" id="valH">0.0</span>
-        </div>
-        <input type="range" id="sliderH" min="-8" max="8" step="0.5" value="0">
-      </div>
-
-      <!-- 滑塊 k -->
-      <div class="control-group">
-        <div class="label-row">
-          <label for="sliderK">上下平移 <b>(k)</b></label>
-          <span class="param-val" id="valK">0.0</span>
-        </div>
-        <input type="range" id="sliderK" min="-8" max="8" step="0.5" value="0">
-      </div>
-
-      <!-- 特徵資訊顯示 -->
-      <div class="info-card">
-        <div class="info-item">
-          <span class="info-label">頂點座標 (h, k)：</span>
-          <span class="info-value" id="infoVertex" style="color: var(--accent-color);">(0, 0)</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">對稱軸：</span>
-          <span class="info-value" id="infoAxis">x = 0</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">開口方向：</span>
-          <span class="info-value" id="infoDir">向上</span>
-        </div>
-      </div>
-
-      <button class="reset-btn" id="resetBtn">重設參數</button>
-    </div>
+  <div class="info-panel">
+    <div>圓心角 $\angle AOB$ = <span id="angleO" class="highlight">0</span>°</div>
+    <div>圓周角 $\angle ACB$ = <span id="angleC" class="highlight">0</span>°</div>
+    <div>關係比值 ($\angle AOB \div \angle ACB$) = <span id="ratio" class="highlight">0</span></div>
   </div>
 
   <script>
-    const canvas = document.getElementById('gridCanvas');
+    const canvas = document.getElementById('geoCanvas');
     const ctx = canvas.getContext('2d');
 
-    // 控制元件 DOM
-    const sliderA = document.getElementById('sliderA');
-    const sliderH = document.getElementById('sliderH');
-    const sliderK = document.getElementById('sliderK');
-    
-    const valA = document.getElementById('valA');
-    const valH = document.getElementById('valH');
-    const valK = document.getElementById('valK');
+    const center = { x: 250, y: 250 };
+    const radius = 180;
 
-    const formulaText = document.getElementById('formulaText');
-    const infoVertex = document.getElementById('infoVertex');
-    const infoAxis = document.getElementById('infoAxis');
-    const infoDir = document.getElementById('infoDir');
-    const resetBtn = document.getElementById('resetBtn');
+    // 角度 (以弧度表示)
+    let angleA = Math.PI * 0.75;  // 左下
+    let angleB = Math.PI * 0.25;  // 右下
+    let angleC = -Math.PI * 0.5;  // 正上方
 
-    // 座標系設定
-    const width = canvas.width;
-    const height = canvas.height;
-    const scale = 25; // 1個單位 = 25 像素
-    const originX = width / 2;
-    const originY = height / 2;
+    let activePoint = null;
 
-    // 將數學座標轉為 Canvas 像素座標
-    function toCanvasX(x) { return originX + x * scale; }
-    function toCanvasY(y) { return originY - y * scale; }
-
-    // 繪製網格與座標軸
-    function drawGrid() {
-      ctx.clearRect(0, 0, width, height);
-
-      // 網格線
-      ctx.strokeStyle = '#f1f5f9';
-      ctx.lineWidth = 1;
-
-      for (let x = 0; x < width; x += scale) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, height);
-        ctx.stroke();
-      }
-      for (let y = 0; y < height; y += scale) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(width, y);
-        ctx.stroke();
-      }
-
-      // X 軸與 Y 軸
-      ctx.strokeStyle = '#94a3b8';
-      ctx.lineWidth = 2;
-
-      // X 軸
-      ctx.beginPath();
-      ctx.moveTo(0, originY);
-      ctx.lineTo(width, originY);
-      ctx.stroke();
-
-      // Y 軸
-      ctx.beginPath();
-      ctx.moveTo(originX, 0);
-      ctx.lineTo(originX, height);
-      ctx.stroke();
-
-      // 標註刻度數字
-      ctx.fillStyle = '#94a3b8';
-      ctx.font = '10px sans-serif';
-      ctx.textAlign = 'center';
-
-      for (let x = -10; x <= 10; x += 2) {
-        if (x !== 0) ctx.fillText(x, toCanvasX(x), originY + 14);
-      }
-      ctx.textAlign = 'right';
-      for (let y = -10; y <= 10; y += 2) {
-        if (y !== 0) ctx.fillText(y, originX - 6, toCanvasY(y) + 4);
-      }
+    function getPos(ang) {
+      return {
+        x: center.x + radius * Math.cos(ang),
+        y: center.y + radius * Math.sin(ang)
+      };
     }
 
-    // 繪製圖像
     function draw() {
-      const a = parseFloat(sliderA.value);
-      const h = parseFloat(sliderH.value);
-      const k = parseFloat(sliderK.value);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // 更新介面數值顯示
-      valA.textContent = a.toFixed(1);
-      valH.textContent = h.toFixed(1);
-      valK.textContent = k.toFixed(1);
+      const A = getPos(angleA);
+      const B = getPos(angleB);
+      const C = getPos(angleC);
 
-      // 動態更新公式顯示
-      const hSign = h >= 0 ? `- ${h}` : `+ ${Math.abs(h)}`;
-      const kSign = k >= 0 ? `+ ${k}` : `- ${Math.abs(k)}`;
-      formulaText.textContent = `f(x) = ${a}(x ${hSign})² ${kSign}`;
-
-      // 更新特徵資訊
-      infoVertex.textContent = `(${h}, ${k})`;
-      infoAxis.textContent = `x = ${h}`;
-      if (a > 0) infoDir.textContent = '向上';
-      else if (a < 0) infoDir.textContent = '向下';
-      else infoDir.textContent = '退化為水平直線';
-
-      drawGrid();
-
-      // 繪製對稱軸 (虛線)
-      ctx.setLineDash([5, 5]);
-      ctx.strokeStyle = '#cbd5e1';
-      ctx.lineWidth = 1.5;
+      // 畫圓
       ctx.beginPath();
-      ctx.moveTo(toCanvasX(h), 0);
-      ctx.lineTo(toCanvasX(h), height);
+      ctx.arc(center.x, center.y, radius, 0, Math.PI * 2);
+      ctx.strokeStyle = '#ccc';
+      ctx.lineWidth = 2;
       ctx.stroke();
-      ctx.setLineDash([]); // 恢復實線
 
-      // 繪製拋物線
-      ctx.strokeStyle = '#3b82f6';
-      ctx.lineWidth = 3;
+      // 畫圓心角 (OA, OB)
       ctx.beginPath();
+      ctx.moveTo(A.x, A.y);
+      ctx.lineTo(center.x, center.y);
+      ctx.lineTo(B.x, B.y);
+      ctx.strokeStyle = '#e67e22';
+      ctx.lineWidth = 3;
+      ctx.stroke();
 
-      let isFirst = true;
-      for (let px = 0; px <= width; px++) {
-        const x = (px - originX) / scale;
-        const y = a * Math.pow(x - h, 2) + k;
-        const py = toCanvasY(y);
+      // 畫圓周角 (CA, CB)
+      ctx.beginPath();
+      ctx.moveTo(A.x, A.y);
+      ctx.lineTo(C.x, C.y);
+      ctx.lineTo(B.x, B.y);
+      ctx.strokeStyle = '#2980b9';
+      ctx.lineWidth = 3;
+      ctx.stroke();
 
-        if (isFirst) {
-          ctx.moveTo(px, py);
-          isFirst = false;
-        } else {
-          ctx.lineTo(px, py);
+      // 畫圓心 O
+      drawPoint(center.x, center.y, 'O', '#333');
+      drawPoint(A.x, A.y, 'A', '#e67e22');
+      drawPoint(B.x, B.y, 'B', '#e67e22');
+      drawPoint(C.x, C.y, 'C', '#2980b9');
+
+      updateStats(A, B, C);
+    }
+
+    function drawPoint(x, y, label, color) {
+      ctx.beginPath();
+      ctx.arc(x, y, 8, 0, Math.PI * 2);
+      ctx.fillStyle = color;
+      ctx.fill();
+      ctx.fillStyle = '#000';
+      ctx.font = '16px Arial';
+      ctx.fillText(label, x + 12, y + 5);
+    }
+
+    function updateStats(A, B, C) {
+      // 計算圓心角 (劣弧)
+      let degO = Math.abs((angleA - angleB) * (180 / Math.PI));
+      if (degO > 180) degO = 360 - degO;
+
+      // 計算圓周角 (頂點 C 的角度)
+      const vCA = { x: A.x - C.x, y: A.y - C.y };
+      const vCB = { x: B.x - C.x, y: B.y - C.y };
+      const dot = vCA.x * vCB.x + vCA.y * vCB.y;
+      const magCA = Math.hypot(vCA.x, vCA.y);
+      const magCB = Math.hypot(vCB.x, vCB.y);
+      let degC = Math.acos(dot / (magCA * magCB)) * (180 / Math.PI);
+
+      document.getElementById('angleO').innerText = degO.toFixed(1);
+      document.getElementById('angleC').innerText = degC.toFixed(1);
+      document.getElementById('ratio').innerText = (degO / degC).toFixed(2);
+    }
+
+    // 判斷拖曳點
+    canvas.addEventListener('mousedown', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
+
+      const pts = [{ name: 'C', ang: angleC }, { name: 'A', ang: angleA }, { name: 'B', ang: angleB }];
+      for (let p of pts) {
+        const pos = getPos(p.ang);
+        if (Math.hypot(pos.x - mx, pos.y - my) < 15) {
+          activePoint = p.name;
+          break;
         }
       }
-      ctx.stroke();
+    });
 
-      // 繪製頂點 (紅點)
-      ctx.fillStyle = '#ef4444';
-      ctx.beginPath();
-      ctx.arc(toCanvasX(h), toCanvasY(k), 6, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-    }
+    canvas.addEventListener('mousemove', (e) => {
+      if (!activePoint) return;
+      const rect = canvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
 
-    // 事件監聽器
-    sliderA.addEventListener('input', draw);
-    sliderH.addEventListener('input', draw);
-    sliderK.addEventListener('input', draw);
+      let newAng = Math.atan2(my - center.y, mx - center.x);
 
-    resetBtn.addEventListener('click', () => {
-      sliderA.value = 1;
-      sliderH.value = 0;
-      sliderK.value = 0;
+      if (activePoint === 'C') angleC = newAng;
+      if (activePoint === 'A') angleA = newAng;
+      if (activePoint === 'B') angleB = newAng;
+
       draw();
     });
 
-    // 初始化繪製
+    window.addEventListener('mouseup', () => activePoint = null);
+
     draw();
   </script>
 </body>
